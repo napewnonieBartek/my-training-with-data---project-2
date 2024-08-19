@@ -1,0 +1,76 @@
+#cleaning data from null values ​​so that they do not disturb further analyses
+
+DELETE
+FROM world_happiness_report
+WHERE
+    	country IS NULL
+    	OR year IS NULL
+    	OR life_ladder IS NULL
+	OR gdp IS NULL
+	OR social_support IS NULL
+	OR life_expectancy IS NULL
+
+
+
+#checking how many countries have been considered in this report over the years
+
+SELECT
+    year,
+    COUNT(*) AS number_of_countries
+FROM
+    public.world_happiness_report
+GROUP BY
+    year
+ORDER BY
+    year;
+
+
+
+#creating a table showing which countries had the highest score in particular years
+
+WITH ranking AS 
+(
+    SELECT
+        country,
+        year,
+        life_ladder,
+        ROW_NUMBER() OVER (PARTITION BY year ORDER BY life_ladder DESC) AS rank
+    FROM
+        world_happiness_report
+)
+SELECT
+    country,
+    year,
+    life_ladder
+FROM
+    ranking
+WHERE
+    rank = 1
+ORDER BY
+    year;
+
+
+
+#overall top 10 scores from the raport
+
+SELECT
+    country,
+    year
+FROM
+    world_happiness_report
+ORDER BY
+    life_ladder DESC
+LIMIT 10;
+
+
+
+#creating a table showing the average life ladder result for the years included in the report
+
+SELECT
+	year,
+	AVG(life_ladder) AS average_life_ladder
+FROM world_happiness_report
+GROUP BY
+	year
+ORDER BY
+	average_life_ladder DESC
